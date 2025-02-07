@@ -33,9 +33,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   try {
     // Delete the company's image from Cloudinary
-    if (company.companyLogo) {
+    if (company.companyLogo && company.imagePdf) {
       await deleteFromCloudinary(company.companyLogo);
-      console.log("company logo deleted successfully");
+      await deleteFromCloudinary(company.imagePdf);
+      console.log("company logo and pdf deleted successfully");
     }
 
     // Delete the company from the database
@@ -48,7 +49,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     await connectDB();
     const { id } = await params;
   
@@ -63,6 +64,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       const companyName = formData.get("companyName") as string;
       const companyDescription = formData.get("companyDescription") as string;
       const category = formData.get("category") as string;
+      const imagePdf = formData.get("imagePdf") as File
   
       // Validate fields
       if (!companyName) {
@@ -80,16 +82,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       company.companyDescription = companyDescription;
       company.category = category;
   
-      if (companyLogo) {
+      if (companyLogo && imagePdf) {
         // Delete the old image from Cloudinary if a new image is provided
-        if (company.companyLogo) {
+        if (company.companyLogo && company.imagePdf) {
           await deleteFromCloudinary(company.companyLogo);
-          console.log("company logo deleted successfully");
+          await deleteFromCloudinary(company.imagePdf);
+          console.log("company logo and pdf deleted successfully");
         }
   
         // Upload the new image to Cloudinary
-        const newLogoUrl = await uploadToCloudinary(companyLogo, "logolab");
+        const newLogoUrl = await uploadToCloudinary(companyLogo);
+        const newPdfUrl = await uploadToCloudinary(imagePdf);
         company.companyLogo = newLogoUrl;
+        company.imagePdf = newPdfUrl;
       }
   
       // Save the updated company object
