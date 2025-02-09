@@ -1,9 +1,10 @@
+import connectDB from "./db/dbConection"
 import { User } from "./models/userModel"
 import bcrypt from "bcryptjs"
 
 export const adminSeeder = async()=>{
     // find if admin already exists in database
-
+await connectDB();
     const adminExists = await User.findOne( {
         email : "logolabnepal@gmail.com",
     })
