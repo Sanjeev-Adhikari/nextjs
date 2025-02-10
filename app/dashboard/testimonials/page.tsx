@@ -197,6 +197,7 @@ const Page = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded"
                   placeholder="Enter rating"
+                  max="5"
                 />
               </div>
               <div>

@@ -36,7 +36,7 @@ const Header = () => {
             <ul className="py-1">
               <li>
                 <Link
-                  href="/dashboard/logout"
+                  href="/"
                   className=" px-4 py-2 text-xs flex justify-start items-center gap-2  text-gray-700 hover:bg-gray-100"
                 >
                   <img
