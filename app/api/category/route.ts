@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   }
   const createCategory = await Category.create({ categoryName });
   return NextResponse.json({
+    success: true,
     message: "category created successfully",
     data: createCategory,
   });
@@ -21,6 +22,7 @@ export async function GET() {
   await connectDB();
   const categories = await Category.find();
   return NextResponse.json({
+    success: true,
     message: "categories fetched successfully",
     data: categories,
   });

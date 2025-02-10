@@ -1,5 +1,5 @@
 import connectDB from "@/db/dbConection";
-import { Company } from "@/models/comapnyModel";
+import { Company } from "@/models/companyModel";
 import { NextRequest, NextResponse } from "next/server";
 import { uploadToCloudinary } from "@/services/cloudinary";
 
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
+      success: true,
       message: "Company created successfully",
       data: createCompany,
     });
@@ -50,6 +51,7 @@ export async function GET() {
   await connectDB();
   const companies = await Company.find();
   return NextResponse.json({
+    success: true,
     message: "Companies fetched successfully",
     data: companies,
   });

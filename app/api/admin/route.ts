@@ -1,14 +1,17 @@
 import connectDB from "@/db/dbConection";
-import { Company } from "@/models/comapnyModel";
+import { Category } from "@/models/categoryModel";
+import { Company } from "@/models/companyModel";
 import { Contact } from "@/models/contactModel";
 import { Testimonial } from "@/models/testimonialModel";
 import { NextResponse } from "next/server";
+
 
 export async function GET(request: Request) {
     await connectDB();
     const totalWorks = await Company.countDocuments();
     const totalTestimonials = await Testimonial.countDocuments();
     const totalInbox = await Contact.countDocuments();
+    const totalCategories = await Category.countDocuments();
 
     if(!totalWorks){
         return NextResponse.json({
@@ -27,6 +30,11 @@ export async function GET(request: Request) {
             message: "No any inbox found"
         })
     }
+    if(!totalCategories){
+        return NextResponse.json({
+            message: "No any categories found"
+        })
+    }
 
     return NextResponse.json({
         success: true,
@@ -34,7 +42,8 @@ export async function GET(request: Request) {
         data: {
             totalWorks,
             totalTestimonials,
-            totalInbox
+            totalInbox,
+            totalCategories
         }
     })
 }

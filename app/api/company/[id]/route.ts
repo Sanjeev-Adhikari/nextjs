@@ -1,5 +1,5 @@
 import connectDB from "@/db/dbConection";
-import { Company } from "@/models/comapnyModel";
+import { Company } from "@/models/companyModel";
 import { NextRequest, NextResponse } from "next/server";
 import { uploadToCloudinary }   from "@/services/cloudinary";
 import { deleteFromCloudinary } from "@/services/cloudinary";
@@ -13,6 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "company not found" }, { status: 404 });
   }
   return NextResponse.json({
+    success : true,
     message: "single company fetched successfully",
     data: singleCompany,
   });
@@ -42,7 +43,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     // Delete the company from the database
     await company.deleteOne();
 
-    return NextResponse.json({ message: "company deleted successfully" });
+    return NextResponse.json({success : true, message: "company deleted successfully" });
   } catch (error) {
     console.error("Error deleting company:", error);
     return NextResponse.json({ error: "Failed to delete company" }, { status: 500 });

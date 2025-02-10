@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     const picUrl = await uploadToCloudinary(imageUrl);
     const newTestimonial = await Testimonial.create({ name, rating, testimonial, imageUrl: picUrl });
      return NextResponse.json({
+          success: true,
           message: "Testimonial created successfully",
           data: newTestimonial
         });
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
     await connectDB();
     const testimonials = await Testimonial.find({});
     return NextResponse.json({
+        success: true,
         message: "Testimonials fetched successfully",
         data: testimonials
     });

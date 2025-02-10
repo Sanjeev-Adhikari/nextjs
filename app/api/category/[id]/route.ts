@@ -10,6 +10,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: "category not found" }, { status: 404 });
     }
     return NextResponse.json({
+      success: true,
         message: "single category fetched successfully",
         data: singleCategory,
     });
@@ -23,7 +24,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "category not found" }, { status: 404 });
     }
     await category.deleteOne();
-    return NextResponse.json({ message: "category deleted successfully" });
+    return NextResponse.json({    success: true, message: "category deleted successfully" });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -38,7 +39,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "category name is required" }, { status: 400 });
     }
     await category.updateOne({ categoryName });
-    return NextResponse.json({ message: "category updated successfully" , data: category });
+    return NextResponse.json({    success: true,  message: "category updated successfully" , data: category });
 }
 
 

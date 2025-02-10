@@ -12,6 +12,7 @@ export async function GET(req:NextRequest, { params }: { params: Promise<{ id: s
             return NextResponse.json({ message: "Testimonial not found" });
         }
         return NextResponse.json({
+            success: true,
             message: "Testimonial fetched successfully",
             data: singleTestimonial
         });
@@ -35,7 +36,7 @@ export async function DELETE(req:NextRequest, { params }: { params: Promise<{ id
             console.log("testimonial image deleted successfully");
         }
         await testimonial.deleteOne();
-        return NextResponse.json({ message: "Testimonial deleted successfully" }, { status:  200});
+        return NextResponse.json({ success: true, message: "Testimonial deleted successfully" }, { status:  200});
     } catch (error) {
         console.error("Error deleting testimonial:", error);
         return NextResponse.json({ error: "Failed to delete testimonial" }, { status: 500 });

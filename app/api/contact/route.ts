@@ -41,6 +41,7 @@ export async function POST(req:  NextRequest) {
   }
 
   return NextResponse.json({
+    success: true,
     message: 'Contact created successfully',
     data: createContact,
   });
@@ -50,6 +51,7 @@ export async function GET(req: NextRequest) {
     const contacts = await Contact.find({});
     if(!contacts) return NextResponse.json({message: "No contacts found"}, {status: 404});
     return NextResponse.json({
+      success: true,
         message: "All inquiries fetched successfully",
         data: contacts,
     });

@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 
 export interface CompanyData {
+    [x: string]: string;
+    id: string;
     companyName: string;
     companyLogo: string;
     companyDescription: string;
     category: string;
-    imagePdf: string
+    imagePdf: string;
+
 }
 
 const companySchema = new mongoose.Schema<CompanyData>({
