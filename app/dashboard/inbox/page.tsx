@@ -83,16 +83,16 @@ const Page = () => {
             {/* Inbox Details */}
             <h2 className="text-xl font-bold mt-4">Inquiry received from {selectedWork.name}</h2>
             <p className="mt-2">
-              <strong>Email:</strong> {selectedWork.email}
+              <strong className="text-gray-600">Email:</strong> {selectedWork.email}
             </p>
             <p className="mt-2">
-              <strong>Phone Number:</strong> {selectedWork.phone}
+              <strong className="text-gray-600">Phone Number:</strong> {selectedWork.phone}
             </p>
             <p className="mt-2">
-              <strong>Message:</strong> {selectedWork.message}
+              <strong className="text-gray-600">Message:</strong> {selectedWork.message}
             </p>
             <p className="mt-2">
-              <strong>Company Name:</strong> {selectedWork.companyName}
+              <strong className="text-gray-600">Company Name:</strong> {selectedWork.companyName}
             </p>
 
             

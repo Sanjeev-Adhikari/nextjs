@@ -1,5 +1,5 @@
 "use client"
-import React from 'react';
+import React, { FormEvent } from 'react';
 import { Card, CardHeader, CardContent, CardFooter, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState("");
   const router = useRouter();
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 

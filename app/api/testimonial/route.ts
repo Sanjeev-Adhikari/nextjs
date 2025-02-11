@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         });
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     await connectDB();
     const testimonials = await Testimonial.find({});
     return NextResponse.json({

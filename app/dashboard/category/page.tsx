@@ -4,16 +4,16 @@ import { useFetchAllCategories } from "@/hooks/categoryHooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { toast, Toaster } from "react-hot-toast"; // Importing toast and Toaster
+import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 
 const Page = () => {
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = useState(false);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state for the add button
+  const [isLoading, setIsLoading] = useState(false);
   const categories = useFetchAllCategories();
 
   const handleViewClick = (category: any) => {
@@ -25,12 +25,18 @@ const Page = () => {
     setIsAddDrawerOpen(true);
   };
 
+  const handleEditClick = (category: any) => {
+    setSelectedCategory(category);
+    setNewCategoryName(category.categoryName);
+    setIsEditDrawerOpen(true);
+  };
+
   const handleCloseDrawer = () => {
     setIsViewDrawerOpen(false);
     setIsAddDrawerOpen(false);
+    setIsEditDrawerOpen(false);
     setSelectedCategory(null);
     setNewCategoryName("");
-    setNewCategoryDescription("");
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
@@ -60,11 +66,11 @@ const Page = () => {
 
   const handleSubmitCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
 
     const newCategory = {
       categoryName: newCategoryName,
-      description: newCategoryDescription,
+     
     };
 
     try {
@@ -88,7 +94,41 @@ const Page = () => {
       console.error("Error adding category:", error);
       toast.error("Error adding category. Please try again.");
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const updatedCategory = {
+      categoryName: newCategoryName,
+      
+    };
+
+    try {
+      const response = await fetch(`/api/category/${selectedCategory._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedCategory),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Category updated successfully.");
+        handleCloseDrawer();
+        window.location.reload();
+      } else {
+        toast.error("Failed to update category: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error updating category:", error);
+      toast.error("Error updating category. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,14 +142,9 @@ const Page = () => {
 
   return (
     <div className="p-4">
-          <div className="flex justify-between mb-4">
-      <h1 className="text-2xl font-bold">Categories</h1>
-      <Button
-        onClick={handleAddCategory}
-        
-      >
-        Add Category
-      </Button>
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-bold">Categories</h1>
+        <Button onClick={handleAddCategory}>Add Category</Button>
       </div>
 
       {categories.length === 0 ? (
@@ -117,7 +152,7 @@ const Page = () => {
       ) : (
         <Table>
           <TableHeader className="bg-gray-100">
-            <TableRow >
+            <TableRow>
               <TableHead>Name</TableHead>
               <TableHead className="text-end pr-20">Actions</TableHead>
             </TableRow>
@@ -132,6 +167,12 @@ const Page = () => {
                     onClick={() => handleViewClick(category)}
                   >
                     View
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 ml-2"
+                    onClick={() => handleEditClick(category)}
+                  >
+                    Edit
                   </button>
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 ml-2"
@@ -156,7 +197,7 @@ const Page = () => {
             >
               Close
             </button>
-            <h2 className="text-xl font-bold mt-4">Category Name: {selectedCategory.categoryName}</h2>
+            <h2 className="text-xl text-gray-700 mt-4 font-semibold">Category Name: {selectedCategory.categoryName}</h2>
           </div>
         </div>
       )}
@@ -173,7 +214,6 @@ const Page = () => {
             </button>
             <h2 className="text-xl font-bold mt-4">Add New Category</h2>
 
-            {/* Add Category Form */}
             <form className="mt-4" onSubmit={handleSubmitCategory}>
               <div className="mb-4">
                 <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700">
@@ -188,23 +228,53 @@ const Page = () => {
                   required
                 />
               </div>
-              <Button
-                type="submit"
-                
-                disabled={isLoading} 
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  "Add Category"
-                )}
+                  <>
+                  <Loader2 className="animate-spin" size={16} /> Adding Category...</>
+                ) : "Add Category"}
               </Button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Toaster component to show toast messages */}
+      {/* Edit Category Drawer */}
+      {isEditDrawerOpen && selectedCategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
+          <div className="w-1/3 bg-white h-full shadow-lg p-4 overflow-auto">
+            <button
+              className="text-white bg-red-500 px-4 py-2 rounded-md"
+              onClick={handleCloseDrawer}
+            >
+              Close
+            </button>
+            <h2 className="text-xl font-bold mt-4">Edit Category</h2>
+
+            <form className="mt-4" onSubmit={handleEditCategory}>
+              <div className="mb-4">
+                <label htmlFor="editCategoryName" className="block text-sm font-medium text-gray-700">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  id="editCategoryName"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+            
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (<>
+                  <Loader2 className="animate-spin" size={16} />Updating Category...</>) : "Update Category"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Toaster position="top-center" />
     </div>
   );

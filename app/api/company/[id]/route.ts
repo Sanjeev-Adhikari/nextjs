@@ -101,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       // Save the updated company object
       await company.save();
   
-      return NextResponse.json({ message: "company updated successfully", data: company });
+      return NextResponse.json({ success : true,message: "company updated successfully", data: company });
     } catch (error) {
       console.error("Error updating company:", error);
       return NextResponse.json({ error: "Failed to update company" }, { status: 500 });

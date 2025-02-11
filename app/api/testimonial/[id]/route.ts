@@ -18,7 +18,7 @@ export async function GET(req:NextRequest, { params }: { params: Promise<{ id: s
         });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: "Testimonial not found" });
+        return NextResponse.json({ success: true, message: "Testimonial not found" });
     }
 }
 
@@ -77,6 +77,7 @@ export async function PUT(req:NextRequest, { params }: { params: Promise<{ id: s
             updateTestimonial.imageUrl = picUrl;
             await updateTestimonial.save();
             return NextResponse.json({
+                success: true,
                 message: "Testimonial updated successfully",
                 data: updateTestimonial
             });
