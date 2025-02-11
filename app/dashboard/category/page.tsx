@@ -154,7 +154,7 @@ const Page = () => {
           <TableHeader className="bg-gray-100">
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead className="text-end pr-20">Actions</TableHead>
+              <TableHead className="text-end pr-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

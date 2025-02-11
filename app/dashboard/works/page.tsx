@@ -190,7 +190,7 @@ const CompanyTable = () => {
             <TableHead>Description</TableHead>
             <TableHead>Logo</TableHead>
             <TableHead>Image PDF</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-end pr-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -207,7 +207,7 @@ const CompanyTable = () => {
                   View PDF
                 </a>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-end pr-6"> 
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   onClick={() => handleViewClick(work)}
