@@ -120,20 +120,29 @@ const CompanyTable = () => {
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     const companyData = new FormData();
     companyData.append("companyName", formData.companyName);
     companyData.append("category", formData.category);
     companyData.append("companyDescription", formData.companyDescription);
-    if (formData.companyLogo) companyData.append("companyLogo", formData.companyLogo);
-    if (formData.imagePdf) companyData.append("imagePdf", formData.imagePdf);
-
+  
+    // Append company logo if it's selected
+    if (formData.companyLogo) {
+      companyData.append("companyLogo", formData.companyLogo);
+    }
+  
+    // Append image PDF if it's selected
+    if (formData.imagePdf) {
+      companyData.append("imagePdf", formData.imagePdf);
+    }
+  
     try {
+      // Check if we are editing an existing company
       const response = await fetch(`/api/company/${selectedWork._id}`, {
         method: "PUT",
         body: companyData,
       });
-
+  
       const data = await response.json();
       if (data.success) {
         handleCloseEditForm();
@@ -148,6 +157,8 @@ const CompanyTable = () => {
       setIsLoading(false);
     }
   };
+  
+  
   const handleDeleteClick = async (_id: string) => {
     setDeletingId(_id);
 
@@ -203,10 +214,15 @@ const CompanyTable = () => {
                 <img src={work.companyLogo} alt="Company Logo" className="h-12 w-12 object-cover rounded-full" />
               </TableCell>
               <TableCell>
-                <a href={work.imagePdf} target="_blank" className="text-blue-600 hover:underline">
-                  View PDF
-                </a>
-              </TableCell>
+  <a
+    href={work.imagePdf} // Ensure this is a direct link to the PDF
+    target="_blank"
+    rel="noopener noreferrer" // Improve security for opening new tabs
+    className="text-blue-600 hover:underline"
+  >
+    View PDF
+  </a>
+</TableCell>
               <TableCell className="text-end pr-6"> 
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
