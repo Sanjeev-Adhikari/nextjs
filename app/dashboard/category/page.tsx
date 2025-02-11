@@ -3,23 +3,31 @@
 import { useFetchAllCategories } from "@/hooks/categoryHooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 const Page = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAdmin = Cookies.get("isAdmin");
+
+    if (!isAdmin) {
+      // Redirect to login if the user is not an admin
+      router.push("/");
+    }
+  }, [router]);
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = useState(false);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const categories = useFetchAllCategories();
+  const { categories, refetchCategories } = useFetchAllCategories();
 
-  const handleViewClick = (category: any) => {
-    setSelectedCategory(category);
-    setIsViewDrawerOpen(true);
-  };
 
   const handleAddCategory = () => {
     setIsAddDrawerOpen(true);
@@ -53,7 +61,7 @@ const Page = () => {
         if (data.success) {
           toast.success("Category deleted successfully.");
           handleCloseDrawer();
-          window.location.reload();
+          refetchCategories()
         } else {
           toast.error("Failed to delete category: " + data.message);
         }
@@ -70,7 +78,7 @@ const Page = () => {
 
     const newCategory = {
       categoryName: newCategoryName,
-     
+
     };
 
     try {
@@ -86,7 +94,7 @@ const Page = () => {
       if (data.success) {
         toast.success("Category added successfully.");
         handleCloseDrawer();
-        window.location.reload();
+        refetchCategories()
       } else {
         toast.error("Failed to add category: " + data.message);
       }
@@ -104,7 +112,7 @@ const Page = () => {
 
     const updatedCategory = {
       categoryName: newCategoryName,
-      
+
     };
 
     try {
@@ -120,7 +128,7 @@ const Page = () => {
       if (data.success) {
         toast.success("Category updated successfully.");
         handleCloseDrawer();
-        window.location.reload();
+        refetchCategories()
       } else {
         toast.error("Failed to update category: " + data.message);
       }
@@ -162,12 +170,6 @@ const Page = () => {
               <TableRow key={category._id}>
                 <TableCell>{category.categoryName}</TableCell>
                 <TableCell className="text-end pr-6">
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={() => handleViewClick(category)}
-                  >
-                    View
-                  </button>
                   <button
                     className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 ml-2"
                     onClick={() => handleEditClick(category)}
@@ -231,7 +233,7 @@ const Page = () => {
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                  <Loader2 className="animate-spin" size={16} /> Adding Category...</>
+                    <Loader2 className="animate-spin" size={16} /> Adding Category...</>
                 ) : "Add Category"}
               </Button>
             </form>
@@ -265,7 +267,7 @@ const Page = () => {
                   required
                 />
               </div>
-            
+
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (<>
                   <Loader2 className="animate-spin" size={16} />Updating Category...</>) : "Update Category"}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export const useFetchAllCategories = () => {
     const [categories, setCategories] = useState<CategoryData[] | null>(null);
 
-    useEffect(() => {
+    const fetchcategories = async () => {
         fetch("/api/category", {
             method: "GET",
             headers: {
@@ -20,8 +20,11 @@ export const useFetchAllCategories = () => {
                     console.error("Data fetch failed:", data.message);
                 }
             })
-            .catch((error) => { console.error("Error fetching data:", error); });
+            .catch((error) => { console.error("Error fetching data:", error); });}
+
+    useEffect(() => {
+        fetchcategories();
     }, []);            
 
-    return categories;
+    return  { categories, refetchCategories: fetchcategories };;
 };

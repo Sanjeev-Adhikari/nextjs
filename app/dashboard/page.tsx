@@ -1,9 +1,21 @@
 "use client"
-import React from "react";
+import React, { useEffect } from "react";
 import Card from "@/components/card/card";
 import { fetchDashboardData, getCards } from "@/hooks/dashboardHooks";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 const Page = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAdmin = Cookies.get("isAdmin");
+
+    if (!isAdmin) {
+      // Redirect to login if the user is not an admin
+      router.push("/");
+    }
+  }, [router]);
   const dashboardData = fetchDashboardData();
   const cards = getCards(dashboardData);
 

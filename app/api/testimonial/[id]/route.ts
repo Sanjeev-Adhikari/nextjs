@@ -43,49 +43,116 @@ export async function DELETE(req:NextRequest, { params }: { params: Promise<{ id
     }
 }
 
-export async function PUT(req:NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    await connectDB();
-    const {id} = (await params);
-    const updateTestimonial = await Testimonial.findById(id);
+// export async function PUT(req:NextRequest, { params }: { params: Promise<{ id: string }> }) {
+//     await connectDB();
+//     const {id} = (await params);
+//     const updateTestimonial = await Testimonial.findById(id);
 
-    if(!updateTestimonial) {
-        return NextResponse.json({ message: "Testimonial not found" }, { status: 404 });
-    }
-    try {
-        const formData = await req.formData();
-        const name = formData.get("name") as string;
-        const rating = formData.get("rating") ? Number(formData.get("rating")) : undefined;
-        const testimonial = formData.get("testimonial") as string;
-        const imageUrl = formData.get("imageUrl") as File;
+//     if(!updateTestimonial) {
+//         return NextResponse.json({ message: "Testimonial not found" }, { status: 404 });
+//     }
+//     try {
+//         const formData = await req.formData();
+//         const name = formData.get("name") as string;
+//         const rating = formData.get("rating") ? Number(formData.get("rating")) : undefined;
+//         const testimonial = formData.get("testimonial") as string;
+//         const imageUrl = formData.get("imageUrl") as File;
         
 
-        if(!name || !testimonial || !imageUrl) {
-            return NextResponse.json({ message: "Please fill all the fields" });
+//         if(name) updateTestimonial.name = name;
+//          if (rating) updateTestimonial.rating = rating;
+//         if(testimonial) updateTestimonial.testimonial = testimonial;
+        
+
+//         console.log("imageUrl", imageUrl)
+//         if(imageUrl) {
+//             if(updateTestimonial.imageUrl) {
+//                 await deleteFromCloudinary(updateTestimonial.imageUrl);
+//                 console.log("testimonial image deleted successfully");
+//             }
+//             const picUrl = await uploadToCloudinary(imageUrl);
+//             updateTestimonial.imageUrl = picUrl;
+//             await updateTestimonial.save();
+//             return NextResponse.json({
+//                 success: true,
+//                 message: "Testimonial updated successfully",
+//                 data: updateTestimonial
+//             });
+//         }
+        
+    
+//     } catch (error) {
+//         console.error("Error updating testimonial:", error);
+//         return NextResponse.json({ error: "Failed to update testimonial" }, { status: 500 });
+//     }
+// }
+
+
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    await connectDB();
+    const { id } = (await params);
+    const updateTestimonial = await Testimonial.findById(id);
+    
+    if (!updateTestimonial) {
+        return NextResponse.json({ message: "Testimonial not found" }, { status: 404 });
+    }
+    
+    try {
+        const formData = await req.formData();
+        let hasUpdates = false;
+        
+        // Handle text fields
+        const name = formData.get("name") as string | null;
+        const rating = formData.get("rating") ? Number(formData.get("rating")) : null;
+        const testimonial = formData.get("testimonial") as string | null;
+        const imageUrl = formData.get("imageUrl") as File | null;
+        
+        // Only update fields that were sent
+        if (name !== null) {
+            updateTestimonial.name = name;
+            hasUpdates = true;
         }
-
-        updateTestimonial.name = name;
-        updateTestimonial.rating = rating;
-        updateTestimonial.testimonial = testimonial;
-
-        console.log("imageUrl", imageUrl)
-        if(imageUrl) {
-            if(updateTestimonial.imageUrl) {
+        
+        if (rating !== null) {
+            updateTestimonial.rating = rating;
+            hasUpdates = true;
+        }
+        
+        if (testimonial !== null) {
+            updateTestimonial.testimonial = testimonial;
+            hasUpdates = true;
+        }
+        
+        // Handle image update if provided
+        if (imageUrl && imageUrl instanceof File) {
+            if (updateTestimonial.imageUrl) {
                 await deleteFromCloudinary(updateTestimonial.imageUrl);
                 console.log("testimonial image deleted successfully");
             }
             const picUrl = await uploadToCloudinary(imageUrl);
             updateTestimonial.imageUrl = picUrl;
+            hasUpdates = true;
+        }
+        
+        if (hasUpdates) {
             await updateTestimonial.save();
             return NextResponse.json({
                 success: true,
                 message: "Testimonial updated successfully",
                 data: updateTestimonial
             });
+        } else {
+            return NextResponse.json({
+                success: false,
+                message: "No updates provided"
+            }, { status: 400 });
         }
         
-    
     } catch (error) {
         console.error("Error updating testimonial:", error);
-        return NextResponse.json({ error: "Failed to update testimonial" }, { status: 500 });
+        return NextResponse.json({ 
+            success: false,
+            error: "Failed to update testimonial" 
+        }, { status: 500 });
     }
 }

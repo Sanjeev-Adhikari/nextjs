@@ -3,9 +3,20 @@
 import { useFetchAllInbox } from "@/hooks/inboxHooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 const Page = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAdmin = Cookies.get("isAdmin");
+
+    if (!isAdmin) {
+      // Redirect to login if the user is not an admin
+      router.push("/");
+    }
+  }, [router]);
   const [selectedWork, setSelectedWork] = useState<any | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -44,6 +55,7 @@ const Page = () => {
               <TableHead>Phone Number</TableHead>
               <TableHead>Message</TableHead>
               <TableHead>Company Name</TableHead>
+              <TableHead>Address</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -55,6 +67,7 @@ const Page = () => {
                 <TableCell>{message.phone}</TableCell>
                 <TableCell>{message.message}</TableCell>
                 <TableCell>{message.companyName}</TableCell>
+                <TableCell>{message.address}</TableCell>
                 <TableCell>
                   <button
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -93,6 +106,9 @@ const Page = () => {
             </p>
             <p className="mt-2">
               <strong className="text-gray-600">Company Name:</strong> {selectedWork.companyName}
+            </p>
+            <p className="mt-2">
+              <strong className="text-gray-600">Company Address:</strong> {selectedWork.address}
             </p>
 
             

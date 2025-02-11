@@ -13,6 +13,9 @@ import Cookies from "js-cookie";
 
 const CompanyTable = () => {
 
+    const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+const [selectedPdfUrl, setSelectedPdfUrl] = useState("");
+
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +48,10 @@ const CompanyTable = () => {
     setIsDrawerOpen(true);
   };
 
+  const handlePdfView = (pdfUrl: string) => {
+    setSelectedPdfUrl(pdfUrl);
+    setIsPdfViewerOpen(true);
+  };
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedWork(null);
@@ -216,10 +223,13 @@ const CompanyTable = () => {
                 <img src={work.companyLogo} alt="Company Logo" className="h-12 w-12 object-cover rounded-full" />
               </TableCell>
               <TableCell>
-                <a href={work.imagePdf} target="_blank" className="text-blue-600 hover:underline">
-                  View PDF
-                </a>
-              </TableCell>
+  <button
+    onClick={() => handlePdfView(work.imagePdf)}
+    className="text-blue-600 hover:underline cursor-pointer"
+  >
+    View PDF
+  </button>
+</TableCell>
               <TableCell className="text-end pr-6"> 
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -271,15 +281,14 @@ const CompanyTable = () => {
               <strong className="text-gray-600">Description:</strong> {selectedWork.companyDescription}
             </p>
             <div className="mt-4">
-              <strong className="text-gray-600">PDF:</strong>
-              <a
-                href={selectedWork.imagePdf}
-                target="_blank"
-                className="text-blue-600 hover:underline"
-              >
-                View PDF
-              </a>
-            </div>
+  <strong className="text-gray-600">PDF:</strong>
+  <button
+    onClick={() => handlePdfView(selectedWork.imagePdf)}
+    className="text-blue-600 hover:underline ml-2 cursor-pointer"
+  >
+    View PDF
+  </button>
+</div>
           </div>
         </div>
       )}

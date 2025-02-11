@@ -1,23 +1,32 @@
 "use client";
 
 import { useFetchAllTestimonials } from "@/hooks/testimonialHooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TestimonialData } from "@/interfaces/testimonial";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 const Page = () => {
-  const testimonials: TestimonialData[] | null = useFetchAllTestimonials();
+  const router = useRouter();
 
+  useEffect(() => {
+    const isAdmin = Cookies.get("isAdmin");
+
+    if (!isAdmin) {
+      // Redirect to login if the user is not an admin
+      router.push("/");
+    }
+  }, [router]);
+  const { testimonials, refetchTestimonials } = useFetchAllTestimonials();
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [isViewDrawerOpen, setIsViewDrawerOpen] = useState(false);
   const [selectedTestimonial, setSelectedTestimonial] = useState<TestimonialData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
   const [formData, setFormData] = useState({
     name: "",
     rating: "",
@@ -33,10 +42,6 @@ const Page = () => {
       imageUrl: null,
     }); // Clear form data when opening Add Drawer
     setIsAddDrawerOpen(true);
-  };
-
-  const handleAddDrawerClose = () => {
-    setIsAddDrawerOpen(false);
   };
 
   const handleEditDrawerOpen = (testimonial: TestimonialData) => {
@@ -70,7 +75,7 @@ const Page = () => {
 
       if (data.success) {
         toast.success("Testimonial deleted successfully!");
-        window.location.reload();
+        await refetchTestimonials(); // Refetch instead of reload
       } else {
         toast.error(`Failed to delete testimonial: ${data.message}`);
       }
@@ -80,6 +85,7 @@ const Page = () => {
       setDeletingId(null);
     }
   };
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
@@ -98,37 +104,65 @@ const Page = () => {
     setIsLoading(true);
 
     const testimonialData = new FormData();
-    testimonialData.append("name", formData.name);
-    testimonialData.append("rating", formData.rating);
-    testimonialData.append("testimonial", formData.testimonial);
-    if (formData.imageUrl) testimonialData.append("imageUrl", formData.imageUrl);
+    let hasChanges = false;
+
+    if (isEditDrawerOpen && selectedTestimonial) {
+      // Edit mode logic
+      if (formData.name !== selectedTestimonial.name) {
+        testimonialData.append("name", formData.name);
+        hasChanges = true;
+      }
+      if (formData.rating !== selectedTestimonial.rating.toString()) {
+        testimonialData.append("rating", formData.rating);
+        hasChanges = true;
+      }
+      if (formData.testimonial !== selectedTestimonial.testimonial) {
+        testimonialData.append("testimonial", formData.testimonial);
+        hasChanges = true;
+      }
+      if (formData.imageUrl) {
+        testimonialData.append("imageUrl", formData.imageUrl);
+        hasChanges = true;
+      }
+    } else {
+      // Create mode logic
+      testimonialData.append("name", formData.name);
+      testimonialData.append("rating", formData.rating);
+      testimonialData.append("testimonial", formData.testimonial);
+      if (formData.imageUrl) {
+        testimonialData.append("imageUrl", formData.imageUrl);
+      }
+      hasChanges = true;
+    }
+
+    if (!hasChanges && isEditDrawerOpen) {
+      toast.error("No changes detected");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      let url = "/api/testimonial";
-      let method = "POST";
-
-      if (isEditDrawerOpen && selectedTestimonial) {
-        url = `/api/testimonial/${selectedTestimonial._id}`;
-        method = "PUT";
-      }
+      const url = isEditDrawerOpen && selectedTestimonial
+        ? `/api/testimonial/${selectedTestimonial._id}`
+        : "/api/testimonial";
 
       const response = await fetch(url, {
-        method: method,
+        method: isEditDrawerOpen ? "PUT" : "POST",
         body: testimonialData,
       });
 
       const data = await response.json();
 
       if (data.success) {
-        toast.success(isEditDrawerOpen ? "Testimonial updated successfully!" : "Testimonial added successfully!");
-        handleAddDrawerClose();
+        toast.success(isEditDrawerOpen ? "Testimonial updated successfully!" : "Testimonial added!");
         handleDrawerClose();
-        window.location.reload();
+        await refetchTestimonials(); // Refetch instead of reload
       } else {
-        toast.error(`Failed to ${isEditDrawerOpen ? "update" : "add"} testimonial: ${data.message}`);
+        toast.error(data.message || "Failed to submit testimonial.");
       }
     } catch (error) {
-      toast.error("An error occurred while submitting the testimonial.");
+      console.error("Error submitting testimonial:", error);
+      toast.error("An error occurred while submitting.");
     } finally {
       setIsLoading(false);
     }
@@ -168,14 +202,14 @@ const Page = () => {
               </TableCell>
               <TableCell className="text-end pr-6">
                 <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => handleViewDrawerOpen(testimonial)}>View</button>
-                
+
                 <button className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 ml-2 " onClick={() => handleEditDrawerOpen(testimonial)}>Edit</button>
-                <button             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 ml-2"onClick={() => handleDeleteClick(testimonial._id)} disabled={deletingId === testimonial._id}>
+                <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 ml-2" onClick={() => handleDeleteClick(testimonial._id)} disabled={deletingId === testimonial._id}>
                   {deletingId === testimonial._id ? <Loader2 className="animate-spin" /> : "Delete"}
                 </button>
               </TableCell>
             </TableRow>
-            
+
           ))}
         </TableBody>
       </Table>
@@ -212,87 +246,85 @@ const Page = () => {
         </div>
       )}
 
-   {/* Edit Drawer */}
-{isEditDrawerOpen && selectedTestimonial && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
-    <div className="w-1/3 bg-white h-full shadow-lg p-4">
-      <button className="text-white bg-red-500 px-4 py-2 rounded-md" onClick={handleDrawerClose}>Close</button>
-      <h2 className="text-xl font-bold mt-4">Edit Testimonial</h2>
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        {/* Name Field */}
-        <div>
-          <label className="block text-sm font-medium">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border rounded"
-          />
+      {/* Edit Drawer */}
+      {isEditDrawerOpen && selectedTestimonial && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
+          <div className="w-1/3 bg-white h-full shadow-lg p-4">
+            <button className="text-white bg-red-500 px-4 py-2 rounded-md" onClick={handleDrawerClose}>Close</button>
+            <h2 className="text-xl font-bold mt-4">Edit Testimonial</h2>
+            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+              {/* Name Field */}
+              <div>
+                <label className="block text-sm font-medium">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded"
+                />
+              </div>
+
+              {/* Rating Field */}
+              <div>
+                <label className="block text-sm font-medium">Rating</label>
+                <input
+                  type="number"
+                  name="rating"
+                  value={formData.rating}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded"
+                  max="5"
+                  min="1"
+                />
+              </div>
+
+              {/* Testimonial Field */}
+              <div>
+                <label className="block text-sm font-medium">Testimonial</label>
+                <textarea
+                  name="testimonial"
+                  value={formData.testimonial}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded"
+                />
+              </div>
+
+              {/* Image Preview and Upload */}
+              <div>
+                <label className="block text-sm font-medium">Image URL</label>
+                {/* Show preview if imageUrl exists */}
+                {selectedTestimonial.imageUrl && (
+                  <div className="mb-2">
+                    <img
+                      src={selectedTestimonial.imageUrl}
+                      alt="Current Image"
+                      className="h-20 w-20 rounded-full object-cover"
+                    />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  name="imageUrl"
+                  onChange={handleFileChange}
+                  className="w-full px-3 py-2 border rounded"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" /> Updating Testimonial...
+                  </>
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            </form>
+          </div>
         </div>
-
-        {/* Rating Field */}
-        <div>
-          <label className="block text-sm font-medium">Rating</label>
-          <input
-            type="number"
-            name="rating"
-            value={formData.rating}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border rounded"
-            max="5"
-            min="1"
-          />
-        </div>
-
-        {/* Testimonial Field */}
-        <div>
-          <label className="block text-sm font-medium">Testimonial</label>
-          <textarea
-            name="testimonial"
-            value={formData.testimonial}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border rounded"
-          />
-        </div>
-
-        {/* Image Preview and Upload */}
-        <div>
-          <label className="block text-sm font-medium">Image URL</label>
-          {/* Show preview if imageUrl exists */}
-          {selectedTestimonial.imageUrl && (
-            <div className="mb-2">
-              <img
-                src={selectedTestimonial.imageUrl}
-                alt="Current Image"
-                className="h-20 w-20 rounded-full object-cover"
-              />
-            </div>
-          )}
-          <input
-            type="file"
-            name="imageUrl"
-            onChange={handleFileChange}
-            className="w-full px-3 py-2 border rounded"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? (
-            <>
-              <Loader2 className="animate-spin" /> Updating Testimonial...
-            </>
-          ) : (
-            "Submit"
-          )}
-        </Button>
-      </form>
-    </div>
-  </div>
-)}
-
-
+      )}
       <Toaster />
     </div>
   );
