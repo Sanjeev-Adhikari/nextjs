@@ -44,7 +44,6 @@ const PDFViewer = ({
               src={googleDocsUrl}
               className="w-full h-full border-none"
               title="PDF Viewer"
-              frameBorder="0"
             />
           </div>
         </div>

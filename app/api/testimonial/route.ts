@@ -11,17 +11,17 @@ export async function POST(req: NextRequest) {
     const testimonial = formData.get("testimonial") as string;
     const imageUrl = formData.get("imageUrl") as File;
 
-    if(!name || !testimonial || !imageUrl) {
+    if (!name || !testimonial || !imageUrl) {
         return NextResponse.json({ message: "Please fill all the fields" });
     }
 
     const picUrl = await uploadToCloudinary(imageUrl);
     const newTestimonial = await Testimonial.create({ name, rating, testimonial, imageUrl: picUrl });
-     return NextResponse.json({
-          success: true,
-          message: "Testimonial created successfully",
-          data: newTestimonial
-        });
+    return NextResponse.json({
+        success: true,
+        message: "Testimonial created successfully",
+        data: newTestimonial
+    });
 }
 
 export async function GET() {

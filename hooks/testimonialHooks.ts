@@ -46,7 +46,7 @@ export const useFetchAllTestimonials = () => {
         },
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setTestimonials(data.data);
       } else {

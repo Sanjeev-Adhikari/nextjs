@@ -1,5 +1,4 @@
 "use client";
-
 import { useFetchAllTestimonials } from "@/hooks/testimonialHooks";
 import { useEffect, useState } from "react";
 import { TestimonialData } from "@/interfaces/testimonial";
@@ -11,12 +10,10 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 const Page = () => {
   const router = useRouter();
-
   useEffect(() => {
     const isAdmin = Cookies.get("isAdmin");
 
     if (!isAdmin) {
-      // Redirect to login if the user is not an admin
       router.push("/");
     }
   }, [router]);
@@ -40,7 +37,7 @@ const Page = () => {
       rating: "",
       testimonial: "",
       imageUrl: null,
-    }); // Clear form data when opening Add Drawer
+    });
     setIsAddDrawerOpen(true);
   };
 
@@ -50,7 +47,7 @@ const Page = () => {
       name: testimonial.name,
       rating: testimonial.rating.toString(),
       testimonial: testimonial.testimonial,
-      imageUrl: null, // Do not keep the old image, so it is not prefilled
+      imageUrl: null, 
     });
     setIsEditDrawerOpen(true);
   };
@@ -66,7 +63,6 @@ const Page = () => {
     setIsViewDrawerOpen(false);
     setSelectedTestimonial(null);
   };
-
   const handleDeleteClick = async (_id: string) => {
     const confirmation = window.confirm("Are you sure you want to delete this category?");
     if(confirmation) {
@@ -88,7 +84,6 @@ const Page = () => {
     }
   }
   };
-
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
@@ -128,7 +123,6 @@ const Page = () => {
         hasChanges = true;
       }
     } else {
-      // Create mode logic
       testimonialData.append("name", formData.name);
       testimonialData.append("rating", formData.rating);
       testimonialData.append("testimonial", formData.testimonial);
@@ -155,7 +149,6 @@ const Page = () => {
       });
 
       const data = await response.json();
-
       if (data.success) {
         toast.success(isEditDrawerOpen ? "Testimonial updated successfully!" : "Testimonial added!");
         handleDrawerClose();
@@ -313,7 +306,7 @@ const Page = () => {
                   className="w-full px-3 py-2 border rounded"
                 />
               </div>
-
+              
               {/* Submit Button */}
               <Button type="submit" disabled={isLoading} className="w-full">
                 {isLoading ? (

@@ -26,21 +26,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await connectDB();
   const { id } = await params;
-
   const company = await Company.findById(id);
   if (!company) {
     return NextResponse.json({ error: "company not found" }, { status: 404 });
   }
 
   try {
-    // Delete the company's image from Cloudinary
     if (company.companyLogo && company.imagePdf) {
       await deleteFromCloudinary(company.companyLogo);
       await deleteFromCloudinary(company.imagePdf);
-      console.log("company logo and pdf deleted successfully");
     }
-
-    // Delete the company from the database
     await company.deleteOne();
 
     return NextResponse.json({ success: true, message: "company deleted successfully" });
@@ -58,7 +53,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!company) {
     return NextResponse.json({ error: "company not found" }, { status: 404 });
   }
-
   try {
     const formData = await req.formData();
     const companyLogo = formData.get("companyLogo") as File;
@@ -85,7 +79,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (companyLogo) {
       if (company.companyLogo) {
         await deleteFromCloudinary(company.companyLogo);
-        console.log("old companyLogo deleted successfully")
       }
       const newLogoUrl = await uploadToCloudinary(companyLogo);
       company.companyLogo = newLogoUrl;
@@ -93,7 +86,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (imagePdf) {
       if (company.imagePdf) {
         await deleteFromCloudinary(company.imagePdf);
-        console.log("Old image pdf deleted successfully");
       }
       const newPdfUrl = await uploadToCloudinary(imagePdf);
       company.imagePdf = newPdfUrl;

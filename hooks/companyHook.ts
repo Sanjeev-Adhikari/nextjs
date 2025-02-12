@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export const useFetchAllWorks = () => {
   const [works, setWorks] = useState<CompanyData[] | null>(null);
 
- const fetchWorks = async () => {
+  const fetchWorks = async () => {
     fetch("/api/company", {
       method: "GET",
       headers: {
@@ -16,7 +16,7 @@ export const useFetchAllWorks = () => {
       .then((data) => {
         console.log("Fetched data:", data);
         if (data.success) {
-          setWorks(data.data); 
+          setWorks(data.data);
         } else {
           console.error("Data fetch failed:", data.message);
         }
@@ -25,10 +25,10 @@ export const useFetchAllWorks = () => {
         console.error("Error fetching data:", error);
       });
   }
-  useEffect(() => {        
-    fetchWorks();           
-    }, []);
-  return {works, refetchWorks: fetchWorks};
+  useEffect(() => {
+    fetchWorks();
+  }, []);
+  return { works, refetchWorks: fetchWorks };
 };
 
 

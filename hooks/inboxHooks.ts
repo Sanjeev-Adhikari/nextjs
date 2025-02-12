@@ -15,7 +15,7 @@ export const useFetchAllInbox = () => {
             .then((data) => {
                 console.log("Fetched data:", data);
                 if (data.success) {
-                    setInbox(data.data); 
+                    setInbox(data.data);
                 } else {
                     console.error("Data fetch failed:", data.message);
                 }

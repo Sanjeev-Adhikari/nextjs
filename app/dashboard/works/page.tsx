@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useFetchAllWorks } from "@/hooks/companyHook";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,18 +45,22 @@ const CompanyTable = () => {
     setSelectedWork(work);
     setIsDrawerOpen(true);
   };
+
   const handlePdfView = (pdfUrl: string) => {
     console.log('Original PDF URL:', pdfUrl);
     setSelectedPdfUrl(pdfUrl);
     setIsPdfViewerOpen(true);
   };
+
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedWork(null);
   };
+  
   const handleAddCompanyClick = () => {
     setIsAddFormOpen(true);
   };
+
   const handleEditClick = (work: CompanyData) => {
     setFormData({
       companyName: work.companyName,
@@ -73,15 +76,18 @@ const CompanyTable = () => {
     });
     setIsEditFormOpen(true);
   };
+
   const handleCloseAddForm = () => {
     setIsAddFormOpen(false);
     resetForm();
   };
+
   const handleCloseEditForm = () => {
     setIsEditFormOpen(false);
     setSelectedWork(null);
     resetForm();
   };
+
   const resetForm = () => {
     setFormData({
       companyName: "",
@@ -91,16 +97,19 @@ const CompanyTable = () => {
       imagePdf: null,
     });
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (files && files[0]) {
       setFormData((prev) => ({ ...prev, [name]: files[0] }));
     }
   };
+
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value }));
   };
@@ -176,7 +185,6 @@ const CompanyTable = () => {
   };
 
   const handleDeleteClick = async (_id: string) => {
-
     const confirmation = window.confirm("Are you sure you want to delete this company?");
     if(confirmation) {
       setDeletingId(_id);
@@ -523,5 +531,4 @@ const CompanyTable = () => {
     </div>
   );
 };
-
 export default CompanyTable;

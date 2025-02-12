@@ -13,18 +13,13 @@ export async function POST(req: NextRequest) {
     const category = formData.get("category") as string
     const imagePdf = formData.get("imagePdf") as File
 
-    console.log("logsss", companyLogo, imagePdf)
-    // Validate required fields
-        if (!companyName || !companyLogo || !companyDescription ||  !category || !imagePdf) {
+    if (!companyName || !companyLogo || !companyDescription || !category || !imagePdf) {
       return NextResponse.json({ error: "please provide the required fields" }, { status: 400 });
     }
 
-
-    // Upload company logo to Cloudinary
     const imageUrl = await uploadToCloudinary(companyLogo);
     const pdfUrl = await uploadToCloudinary(imagePdf)
 
-    // Create company with the uploaded logo URL
     const createCompany = await Company.create({
       companyName,
       companyLogo: imageUrl,

@@ -1,4 +1,4 @@
-interface NavLink{
+interface NavLink {
   href: string,
   label: string,
   icon: string

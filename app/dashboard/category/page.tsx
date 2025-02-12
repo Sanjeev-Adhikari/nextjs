@@ -16,7 +16,6 @@ const Page = () => {
     const isAdmin = Cookies.get("isAdmin");
 
     if (!isAdmin) {
-      // Redirect to login if the user is not an admin
       router.push("/");
     }
   }, [router]);

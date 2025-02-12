@@ -25,5 +25,5 @@ const testimonialSchema = new mongoose.Schema<TestimonialData>({
         type: String,
         required: true,
     }
-});                                 
+});
 export const Testimonial = mongoose.models.Testimonial || mongoose.model<TestimonialData>("Testimonial", testimonialSchema);

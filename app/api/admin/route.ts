@@ -13,24 +13,24 @@ export async function GET(request: Request) {
     const totalInbox = await Contact.countDocuments();
     const totalCategories = await Category.countDocuments();
 
-    if(!totalWorks){
+    if (!totalWorks) {
         return NextResponse.json({
             message: "No any works found"
         })
     }
 
-    if(!totalTestimonials){
+    if (!totalTestimonials) {
         return NextResponse.json({
             message: "No any testimonials found"
         })
     }
 
-    if(!totalInbox){
+    if (!totalInbox) {
         return NextResponse.json({
             message: "No any inbox found"
         })
     }
-    if(!totalCategories){
+    if (!totalCategories) {
         return NextResponse.json({
             message: "No any categories found"
         })

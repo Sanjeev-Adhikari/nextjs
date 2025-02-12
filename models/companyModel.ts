@@ -31,7 +31,7 @@ const companySchema = new mongoose.Schema<CompanyData>({
     imagePdf: {
         type: String,
         required: true
-        
+
     }
 });
 companySchema.index({ companyName: 1 }, { unique: true });

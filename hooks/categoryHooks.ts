@@ -15,16 +15,17 @@ export const useFetchAllCategories = () => {
             .then((data) => {
                 console.log("Fetched data:", data);
                 if (data.success) {
-                    setCategories(data.data); 
+                    setCategories(data.data);
                 } else {
                     console.error("Data fetch failed:", data.message);
                 }
             })
-            .catch((error) => { console.error("Error fetching data:", error); });}
+            .catch((error) => { console.error("Error fetching data:", error); });
+    }
 
     useEffect(() => {
         fetchcategories();
-    }, []);            
+    }, []);
 
-    return  { categories, refetchCategories: fetchcategories };;
+    return { categories, refetchCategories: fetchcategories };;
 };

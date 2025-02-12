@@ -17,7 +17,7 @@ const Header = () => {
     // Remove the isAdmin cookie
     Cookies.remove("isAdmin");
 
-    
+
     router.push("/");
   };
 

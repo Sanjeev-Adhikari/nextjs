@@ -11,9 +11,7 @@ const Page = () => {
 
   useEffect(() => {
     const isAdmin = Cookies.get("isAdmin");
-
     if (!isAdmin) {
-      // Redirect to login if the user is not an admin
       router.push("/");
     }
   }, [router]);
@@ -109,9 +107,7 @@ const Page = () => {
             </p>
             <p className="mt-2">
               <strong className="text-gray-600">Company Address:</strong> {selectedWork.address}
-            </p>
-
-            
+            </p> 
           </div>
         </div>
       )}
