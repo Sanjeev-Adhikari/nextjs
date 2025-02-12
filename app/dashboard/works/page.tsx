@@ -176,12 +176,15 @@ const CompanyTable = () => {
   };
 
   const handleDeleteClick = async (_id: string) => {
-    setDeletingId(_id);
+
+    const confirmation = window.confirm("Are you sure you want to delete this company?");
+    if(confirmation) {
+      setDeletingId(_id);
     const response = await fetch(`/api/company/${_id}`, {
       method: "DELETE",
     });
     const data = await response.json();
-    if (data.success) {
+    if (data.success) { 
       toast.success("Company deleted successfully!");
       refetchWorks();
     } else {
@@ -189,6 +192,7 @@ const CompanyTable = () => {
     }
     setDeletingId(null);
   };
+}
 
   if (!works) {
     return (
@@ -286,11 +290,11 @@ const CompanyTable = () => {
             <div className="mt-4">
               <strong className="text-gray-600">PDF:</strong>
               <button
-                onClick={() => handlePdfView(selectedWork.imagePdf)}
-                className="text-blue-600 hover:underline ml-2 cursor-pointer"
-              >
-                View PDF
-              </button>
+                  onClick={() => handlePdfView(selectedWork.imagePdf)}
+                  className="text-blue-600 hover:underline cursor-pointer"
+                >
+                  View PDF
+                </button>
             </div>
           </div>
         </div>

@@ -68,6 +68,8 @@ const Page = () => {
   };
 
   const handleDeleteClick = async (_id: string) => {
+    const confirmation = window.confirm("Are you sure you want to delete this category?");
+    if(confirmation) {
     setDeletingId(_id);
     try {
       const response = await fetch(`/api/testimonial/${_id}`, { method: "DELETE" });
@@ -84,6 +86,7 @@ const Page = () => {
     } finally {
       setDeletingId(null);
     }
+  }
   };
 
 
