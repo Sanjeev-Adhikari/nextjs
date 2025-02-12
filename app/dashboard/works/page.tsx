@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useFetchAllWorks } from "@/hooks/companyHook";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CompanyData } from "@/models/companyModel";
@@ -15,34 +14,26 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { useFetchAllCategories } from "@/hooks/categoryHooks";
 
 const CompanyTable = () => {
-
-    const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
-const [selectedPdfUrl, setSelectedPdfUrl] = useState("");
-
-
-
-const categories = useFetchAllCategories();
-const fetchedCategories:any = categories.categories;
-console.log("fetched categories", fetchedCategories);
   const router = useRouter();
+  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState("");
+  const categories = useFetchAllCategories();
+  const fetchedCategories: any = categories.categories;
 
   useEffect(() => {
     const isAdmin = Cookies.get("isAdmin");
-
     if (!isAdmin) {
-      // Redirect to login if the user is not an admin
       router.push("/");
     }
   }, [router]);
-const {works, refetchWorks}= useFetchAllWorks();
 
+  const { works, refetchWorks } = useFetchAllWorks();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedWork, setSelectedWork] = useState<any | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
-
   const [formData, setFormData] = useState({
     companyName: "",
     category: "",
@@ -55,8 +46,8 @@ const {works, refetchWorks}= useFetchAllWorks();
     setSelectedWork(work);
     setIsDrawerOpen(true);
   };
-
   const handlePdfView = (pdfUrl: string) => {
+    console.log('Original PDF URL:', pdfUrl);
     setSelectedPdfUrl(pdfUrl);
     setIsPdfViewerOpen(true);
   };
@@ -64,11 +55,9 @@ const {works, refetchWorks}= useFetchAllWorks();
     setIsDrawerOpen(false);
     setSelectedWork(null);
   };
-
   const handleAddCompanyClick = () => {
     setIsAddFormOpen(true);
   };
-
   const handleEditClick = (work: CompanyData) => {
     setFormData({
       companyName: work.companyName,
@@ -88,13 +77,11 @@ const {works, refetchWorks}= useFetchAllWorks();
     setIsAddFormOpen(false);
     resetForm();
   };
-
   const handleCloseEditForm = () => {
     setIsEditFormOpen(false);
     setSelectedWork(null);
     resetForm();
   };
-
   const resetForm = () => {
     setFormData({
       companyName: "",
@@ -104,19 +91,16 @@ const {works, refetchWorks}= useFetchAllWorks();
       imagePdf: null,
     });
   };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (files && files[0]) {
       setFormData((prev) => ({ ...prev, [name]: files[0] }));
     }
   };
-
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value }));
   };
@@ -124,27 +108,24 @@ const {works, refetchWorks}= useFetchAllWorks();
   const handleSubmit = async (e: React.FormEvent, isEdit = false) => {
     e.preventDefault();
     setIsLoading(true);
-
     const companyData = new FormData();
     companyData.append("companyName", formData.companyName);
     companyData.append("category", formData.category);
     companyData.append("companyDescription", formData.companyDescription);
     if (formData.companyLogo) companyData.append("companyLogo", formData.companyLogo);
     if (formData.imagePdf) companyData.append("imagePdf", formData.imagePdf);
-
     try {
       const response = await fetch(isEdit && selectedWork ? `/api/company/${selectedWork._id}` : "/api/company", {
         method: isEdit ? "PUT" : "POST",
         body: companyData,
       });
-
       const data = await response.json();
       if (data.success) {
         isEdit ? handleCloseEditForm() : handleCloseAddForm();
         toast.success(`Company ${isEdit ? "updated" : "added"} successfully!`);
-   refetchWorks();
+        refetchWorks();
       } else {
-       toast.error(`Failed to ${isEdit ? "update" : "add"} company: ${data.message}`);
+        toast.error(`Failed to ${isEdit ? "update" : "add"} company: ${data.message}`);
       }
     } catch (error) {
       toast.error(`An error occurred while ${isEdit ? "updating" : "adding"} the company.`);
@@ -152,10 +133,10 @@ const {works, refetchWorks}= useFetchAllWorks();
       setIsLoading(false);
     }
   };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     const companyData = new FormData();
     companyData.append("companyName", formData.companyName);
     companyData.append("category", formData.category);
@@ -174,14 +155,11 @@ const {works, refetchWorks}= useFetchAllWorks();
     } else {
       companyData.append("existingPdfUrl", selectedWork?.existingPdfUrl || "");
     }
-
-
     try {
       const response = await fetch(`/api/company/${selectedWork._id}`, {
         method: "PUT",
         body: companyData,
       });
-
       const data = await response.json();
       if (data.success) {
         handleCloseEditForm();
@@ -196,22 +174,19 @@ const {works, refetchWorks}= useFetchAllWorks();
       setIsLoading(false);
     }
   };
+
   const handleDeleteClick = async (_id: string) => {
     setDeletingId(_id);
-
     const response = await fetch(`/api/company/${_id}`, {
       method: "DELETE",
     });
-
     const data = await response.json();
-
     if (data.success) {
       toast.success("Company deleted successfully!");
       refetchWorks();
     } else {
       toast.error(`Failed to delete company: ${data.message}`);
     }
-
     setDeletingId(null);
   };
 
@@ -251,14 +226,14 @@ const {works, refetchWorks}= useFetchAllWorks();
                 <img src={work.companyLogo} alt="Company Logo" className="h-12 w-12 object-cover rounded-full" />
               </TableCell>
               <TableCell>
-  <button
-    onClick={() => handlePdfView(work.imagePdf)}
-    className="text-blue-600 hover:underline cursor-pointer"
-  >
-    View PDF
-  </button>
-</TableCell>
-              <TableCell className="text-end pr-3"> 
+                <button
+                  onClick={() => handlePdfView(work.imagePdf)}
+                  className="text-blue-600 hover:underline cursor-pointer"
+                >
+                  View PDF
+                </button>
+              </TableCell>
+              <TableCell className="text-end pr-3">
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   onClick={() => handleViewClick(work)}
@@ -309,14 +284,14 @@ const {works, refetchWorks}= useFetchAllWorks();
               <strong className="text-gray-600">Description:</strong> {selectedWork.companyDescription}
             </p>
             <div className="mt-4">
-  <strong className="text-gray-600">PDF:</strong>
-  <button
-    onClick={() => handlePdfView(selectedWork.imagePdf)}
-    className="text-blue-600 hover:underline ml-2 cursor-pointer"
-  >
-    View PDF
-  </button>
-</div>
+              <strong className="text-gray-600">PDF:</strong>
+              <button
+                onClick={() => handlePdfView(selectedWork.imagePdf)}
+                className="text-blue-600 hover:underline ml-2 cursor-pointer"
+              >
+                View PDF
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -354,13 +329,13 @@ const {works, refetchWorks}= useFetchAllWorks();
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectGroup>
-        {fetchedCategories.map((category: any) => (
-          <SelectItem key={category._id} value={category.categoryName}>
-            {category.categoryName}
-          </SelectItem>
-        ))}
-      </SelectGroup>
+                    <SelectGroup>
+                      {fetchedCategories.map((category: any) => (
+                        <SelectItem key={category._id} value={category.categoryName}>
+                          {category.categoryName}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
@@ -408,7 +383,7 @@ const {works, refetchWorks}= useFetchAllWorks();
           </div>
         </div>
       )}
-       {isEditFormOpen && (
+      {isEditFormOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
           <div className="w-1/3 bg-white h-full shadow-lg p-4 overflow-auto">
             <button
@@ -440,13 +415,13 @@ const {works, refetchWorks}= useFetchAllWorks();
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                  <SelectGroup>
-        {fetchedCategories.map((category: any) => (
-          <SelectItem key={category._id} value={category.categoryName}>
-            {category.categoryName}
-          </SelectItem>
-        ))}
-      </SelectGroup>
+                    <SelectGroup>
+                      {fetchedCategories.map((category: any) => (
+                        <SelectItem key={category._id} value={category.categoryName}>
+                          {category.categoryName}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
@@ -462,60 +437,60 @@ const {works, refetchWorks}= useFetchAllWorks();
                 ></textarea>
               </div>
               <div>
-                
-              <div>
-            <label className="block text-sm font-medium">Logo</label>
-            <div className="mb-2">
-              {selectedWork.existingLogoUrl && (
-                <div className="flex items-center gap-2 mb-2">
-                  <img
-                    src={selectedWork.existingLogoUrl}
-                    alt="Current Logo"
-                    className="h-12 w-12 object-cover rounded-full"
-                  />
-                 
-                </div>
-              )}
-              <input
-                type="file"
-                name="companyLogo"
-                accept="image/*"
-                className="w-full px-3 py-2 border rounded"
-                onChange={handleFileChange}
-              />
-              {formData.companyLogo && (
-                <p className="mt-2 text-sm text-gray-600">
-                  New file: {formData.companyLogo.name}
-                </p>
-              )}
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium">Image PDF</label>
-            <div className="mb-2">
-              {selectedWork.existingPdfUrl && (
-                <div className="mb-2">
-                  <span className="text-sm text-gray-500">
-                    Current PDF: {selectedWork.existingPdfUrl.split('/').pop()}
-                  </span>
+                <div>
+                  <label className="block text-sm font-medium">Logo</label>
+                  <div className="mb-2">
+                    {selectedWork.existingLogoUrl && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <img
+                          src={selectedWork.existingLogoUrl}
+                          alt="Current Logo"
+                          className="h-12 w-12 object-cover rounded-full"
+                        />
+
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      name="companyLogo"
+                      accept="image/*"
+                      className="w-full px-3 py-2 border rounded"
+                      onChange={handleFileChange}
+                    />
+                    {formData.companyLogo && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        New file: {formData.companyLogo.name}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              )}
-              <input
-                type="file"
-                name="imagePdf"
-                accept=".pdf"
-                className="w-full px-3 py-2 border rounded"
-                onChange={handleFileChange}
-              />
-              {formData.imagePdf && (
-                <p className="mt-2 text-sm text-gray-600">
-                  New file: {formData.imagePdf.name}
-                </p>
-              )}
-            </div>
-          </div>
-</div>
+
+                <div>
+                  <label className="block text-sm font-medium">Image PDF</label>
+                  <div className="mb-2">
+                    {selectedWork.existingPdfUrl && (
+                      <div className="mb-2">
+                        <span className="text-sm text-gray-500">
+                          Current PDF: {selectedWork.existingPdfUrl.split('/').pop()}
+                        </span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      name="imagePdf"
+                      accept=".pdf"
+                      className="w-full px-3 py-2 border rounded"
+                      onChange={handleFileChange}
+                    />
+                    {formData.imagePdf && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        New file: {formData.imagePdf.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <Button
                 type="submit"
@@ -535,11 +510,11 @@ const {works, refetchWorks}= useFetchAllWorks();
           </div>
         </div>
       )}
-<PDFViewer
-  isOpen={isPdfViewerOpen}
-  onClose={() => setIsPdfViewerOpen(false)}
-  pdfUrl={selectedPdfUrl}
-/>
+      <PDFViewer
+        isOpen={isPdfViewerOpen}
+        onClose={() => setIsPdfViewerOpen(false)}
+        pdfUrl={selectedPdfUrl}
+      />
       <Toaster />
     </div>
   );

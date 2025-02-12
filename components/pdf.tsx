@@ -1,37 +1,55 @@
 import React from 'react';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-const PDFViewer = ({ 
-  isOpen, 
-  onClose, 
-  pdfUrl 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
+const PDFViewer = ({
+  isOpen,
+  onClose,
+  pdfUrl
+}: {
+  isOpen: boolean;
+  onClose: () => void;
   pdfUrl: string;
 }) => {
+  // Transform Cloudinary URL to ensure inline viewing
+  const transformedPdfUrl = pdfUrl
+    ? pdfUrl.replace('/upload/', '/upload/fl_attachment/')
+    : '';
+
+  // Create Google Docs viewer URL
+  const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(transformedPdfUrl)}&embedded=true`;
+  console.log(googleDocsUrl)
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[80vh] p-0">
-        <div className="flex justify-end p-2 absolute right-2 top-2 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="max-w-[90vw] h-[90vh] p-0">
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-xl font-semibold">PDF Viewer</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex-1 w-full h-full min-h-0">
+            <iframe
+              src={googleDocsUrl}
+              className="w-full h-full border-none"
+              title="PDF Viewer"
+              frameBorder="0"
+            />
+          </div>
         </div>
-        <iframe
-          src={ `${pdfUrl}#toolbar=0`}
-          className="w-full h-full rounded-lg"
-          title="PDF Viewer"
-        />
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
