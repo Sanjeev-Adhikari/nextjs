@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export const useFetchAllWorks = () => {
   const [works, setWorks] = useState<CompanyData[] | null>(null);
 
-  useEffect(() => {
+ const fetchWorks = async () => {
     fetch("/api/company", {
       method: "GET",
       headers: {
@@ -24,8 +24,11 @@ export const useFetchAllWorks = () => {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
-  return works;
+  }
+  useEffect(() => {        
+    fetchWorks();           
+    }, []);
+  return {works, refetchWorks: fetchWorks};
 };
 
 

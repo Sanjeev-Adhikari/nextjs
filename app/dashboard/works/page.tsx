@@ -10,9 +10,20 @@ import { CompanyData } from "@/models/companyModel";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import PDFViewer from "@/components/pdf";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useFetchAllCategories } from "@/hooks/categoryHooks";
 
 const CompanyTable = () => {
 
+    const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+const [selectedPdfUrl, setSelectedPdfUrl] = useState("");
+
+
+
+const categories = useFetchAllCategories();
+const fetchedCategories:any = categories.categories;
+console.log("fetched categories", fetchedCategories);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,7 +34,7 @@ const CompanyTable = () => {
       router.push("/");
     }
   }, [router]);
-  const works: CompanyData[] | null = useFetchAllWorks();
+const {works, refetchWorks}= useFetchAllWorks();
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +56,10 @@ const CompanyTable = () => {
     setIsDrawerOpen(true);
   };
 
+  const handlePdfView = (pdfUrl: string) => {
+    setSelectedPdfUrl(pdfUrl);
+    setIsPdfViewerOpen(true);
+  };
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedWork(null);
@@ -62,10 +77,13 @@ const CompanyTable = () => {
       companyLogo: null,
       imagePdf: null,
     });
-    setSelectedWork(work);
+    setSelectedWork({
+      ...work,
+      existingLogoUrl: work.companyLogo,  // Add existing URLs
+      existingPdfUrl: work.imagePdf
+    });
     setIsEditFormOpen(true);
   };
-
   const handleCloseAddForm = () => {
     setIsAddFormOpen(false);
     resetForm();
@@ -99,6 +117,10 @@ const CompanyTable = () => {
     }
   };
 
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, category: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent, isEdit = false) => {
     e.preventDefault();
     setIsLoading(true);
@@ -120,9 +142,9 @@ const CompanyTable = () => {
       if (data.success) {
         isEdit ? handleCloseEditForm() : handleCloseAddForm();
         toast.success(`Company ${isEdit ? "updated" : "added"} successfully!`);
-        window.location.reload();
+   refetchWorks();
       } else {
-        toast.error(`Failed to ${isEdit ? "update" : "add"} company: ${data.message}`);
+       toast.error(`Failed to ${isEdit ? "update" : "add"} company: ${data.message}`);
       }
     } catch (error) {
       toast.error(`An error occurred while ${isEdit ? "updating" : "adding"} the company.`);
@@ -133,13 +155,26 @@ const CompanyTable = () => {
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     const companyData = new FormData();
     companyData.append("companyName", formData.companyName);
     companyData.append("category", formData.category);
     companyData.append("companyDescription", formData.companyDescription);
-    if (formData.companyLogo) companyData.append("companyLogo", formData.companyLogo);
-    if (formData.imagePdf) companyData.append("imagePdf", formData.imagePdf);
+
+    // Handle logo separately
+    if (formData.companyLogo) {
+      companyData.append("companyLogo", formData.companyLogo);
+    } else {
+      companyData.append("existingLogoUrl", selectedWork?.existingLogoUrl || "");
+    }
+
+    // Handle PDF separately
+    if (formData.imagePdf) {
+      companyData.append("imagePdf", formData.imagePdf);
+    } else {
+      companyData.append("existingPdfUrl", selectedWork?.existingPdfUrl || "");
+    }
+
 
     try {
       const response = await fetch(`/api/company/${selectedWork._id}`, {
@@ -151,7 +186,7 @@ const CompanyTable = () => {
       if (data.success) {
         handleCloseEditForm();
         toast.success("Company updated successfully!");
-        window.location.reload();
+        refetchWorks();
       } else {
         toast.error(`Failed to update company: ${data.message}`);
       }
@@ -172,7 +207,7 @@ const CompanyTable = () => {
 
     if (data.success) {
       toast.success("Company deleted successfully!");
-      window.location.reload();
+      refetchWorks();
     } else {
       toast.error(`Failed to delete company: ${data.message}`);
     }
@@ -216,11 +251,14 @@ const CompanyTable = () => {
                 <img src={work.companyLogo} alt="Company Logo" className="h-12 w-12 object-cover rounded-full" />
               </TableCell>
               <TableCell>
-                <a href={work.imagePdf} target="_blank" className="text-blue-600 hover:underline">
-                  View PDF
-                </a>
-              </TableCell>
-              <TableCell className="text-end pr-6"> 
+  <button
+    onClick={() => handlePdfView(work.imagePdf)}
+    className="text-blue-600 hover:underline cursor-pointer"
+  >
+    View PDF
+  </button>
+</TableCell>
+              <TableCell className="text-end pr-3"> 
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   onClick={() => handleViewClick(work)}
@@ -260,8 +298,8 @@ const CompanyTable = () => {
             >
               Close
             </button>
-            <div className="mt-4 mx-auto w-full max-w-md">
-              <img src={selectedWork.companyLogo} alt="Company Logo" className="rounded-full" />
+            <div className="mt-4 w-[200px]">
+              <img src={selectedWork.companyLogo} alt="Company Logo" className="rounded-md" />
             </div>
             <h2 className="text-xl font-semibold mt-4">{selectedWork.companyName}</h2>
             <p className="mt-2">
@@ -271,15 +309,14 @@ const CompanyTable = () => {
               <strong className="text-gray-600">Description:</strong> {selectedWork.companyDescription}
             </p>
             <div className="mt-4">
-              <strong className="text-gray-600">PDF:</strong>
-              <a
-                href={selectedWork.imagePdf}
-                target="_blank"
-                className="text-blue-600 hover:underline"
-              >
-                View PDF
-              </a>
-            </div>
+  <strong className="text-gray-600">PDF:</strong>
+  <button
+    onClick={() => handlePdfView(selectedWork.imagePdf)}
+    className="text-blue-600 hover:underline ml-2 cursor-pointer"
+  >
+    View PDF
+  </button>
+</div>
           </div>
         </div>
       )}
@@ -309,14 +346,23 @@ const CompanyTable = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium">Category</label>
-                <input
-                  type="text"
-                  name="category"
-                  className="w-full px-3 py-2 border rounded"
-                  placeholder="Enter category"
+                <Select
                   value={formData.category}
-                  onChange={handleInputChange}
-                />
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                  <SelectGroup>
+        {fetchedCategories.map((category: any) => (
+          <SelectItem key={category._id} value={category.categoryName}>
+            {category.categoryName}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium">Description</label>
@@ -386,14 +432,23 @@ const CompanyTable = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium">Category</label>
-                <input
-                  type="text"
-                  name="category"
-                  className="w-full px-3 py-2 border rounded"
-                  placeholder="Enter category"
+                <Select
                   value={formData.category}
-                  onChange={handleInputChange}
-                />
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                  <SelectGroup>
+        {fetchedCategories.map((category: any) => (
+          <SelectItem key={category._id} value={category.categoryName}>
+            {category.categoryName}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium">Description</label>
@@ -407,35 +462,61 @@ const CompanyTable = () => {
                 ></textarea>
               </div>
               <div>
-  <label className="block text-sm font-medium">Logo</label>
-  <input
-    type="file"
-    name="companyLogo"
-    accept="image/*"
-    className="w-full px-3 py-2 border rounded"
-    onChange={handleFileChange}
-  />
-  {formData.companyLogo && (
-    <p className="mt-2 text-sm text-gray-600">
-      Selected file: {formData.companyLogo.name}
-    </p>
-  )}
+                
+              <div>
+            <label className="block text-sm font-medium">Logo</label>
+            <div className="mb-2">
+              {selectedWork.existingLogoUrl && (
+                <div className="flex items-center gap-2 mb-2">
+                  <img
+                    src={selectedWork.existingLogoUrl}
+                    alt="Current Logo"
+                    className="h-12 w-12 object-cover rounded-full"
+                  />
+                 
+                </div>
+              )}
+              <input
+                type="file"
+                name="companyLogo"
+                accept="image/*"
+                className="w-full px-3 py-2 border rounded"
+                onChange={handleFileChange}
+              />
+              {formData.companyLogo && (
+                <p className="mt-2 text-sm text-gray-600">
+                  New file: {formData.companyLogo.name}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Image PDF</label>
+            <div className="mb-2">
+              {selectedWork.existingPdfUrl && (
+                <div className="mb-2">
+                  <span className="text-sm text-gray-500">
+                    Current PDF: {selectedWork.existingPdfUrl.split('/').pop()}
+                  </span>
+                </div>
+              )}
+              <input
+                type="file"
+                name="imagePdf"
+                accept=".pdf"
+                className="w-full px-3 py-2 border rounded"
+                onChange={handleFileChange}
+              />
+              {formData.imagePdf && (
+                <p className="mt-2 text-sm text-gray-600">
+                  New file: {formData.imagePdf.name}
+                </p>
+              )}
+            </div>
+          </div>
 </div>
-<div>
-  <label className="block text-sm font-medium">Image PDF</label>
-  <input
-    type="file"
-    name="imagePdf"
-    accept=".pdf"
-    className="w-full px-3 py-2 border rounded"
-    onChange={handleFileChange}
-  />
-  {formData.imagePdf && (
-    <p className="mt-2 text-sm text-gray-600">
-      Selected file: {formData.imagePdf.name}
-    </p>
-  )}
-</div>
+
               <Button
                 type="submit"
                 className="w-full"
@@ -454,7 +535,11 @@ const CompanyTable = () => {
           </div>
         </div>
       )}
-
+<PDFViewer
+  isOpen={isPdfViewerOpen}
+  onClose={() => setIsPdfViewerOpen(false)}
+  pdfUrl={selectedPdfUrl}
+/>
       <Toaster />
     </div>
   );

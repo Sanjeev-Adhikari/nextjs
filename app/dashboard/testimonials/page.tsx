@@ -200,7 +200,7 @@ const Page = () => {
               <TableCell>
                 <img src={testimonial.imageUrl} alt="User" className="h-12 w-12 rounded-full object-cover" />
               </TableCell>
-              <TableCell className="text-end pr-6">
+              <TableCell className="text-end pr-3">
                 <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => handleViewDrawerOpen(testimonial)}>View</button>
 
                 <button className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 ml-2 " onClick={() => handleEditDrawerOpen(testimonial)}>Edit</button>
@@ -235,7 +235,7 @@ const Page = () => {
             <h2 className="text-xl font-bold mt-4">Add Testimonial</h2>
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div><label className="block text-sm font-medium">Name</label><input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full px-3 py-2 border rounded" /></div>
-              <div><label className="block text-sm font-medium">Rating</label><input type="number" name="rating" value={formData.rating} onChange={handleInputChange} className="w-full px-3 py-2 border rounded" max="5" min="1" /></div>
+              <div><label className="block text-sm font-medium">Rating</label><input type="number" name="rating" value={formData.rating} onChange={handleInputChange} className="w-full px-3 py-2 border rounded" max="5"  /></div>
               <div><label className="block text-sm font-medium">Testimonial</label><textarea name="testimonial" value={formData.testimonial} onChange={handleInputChange} className="w-full px-3 py-2 border rounded"></textarea></div>
               <div><label className="block text-sm font-medium">Image URL</label><input type="file" name="imageUrl" onChange={handleFileChange} className="w-full px-3 py-2 border rounded" /></div>
               <Button type="submit" disabled={isLoading} className="w-full">
@@ -275,7 +275,7 @@ const Page = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded"
                   max="5"
-                  min="1"
+               
                 />
               </div>
 
@@ -292,7 +292,7 @@ const Page = () => {
 
               {/* Image Preview and Upload */}
               <div>
-                <label className="block text-sm font-medium">Image URL</label>
+                <label className="block text-sm font-medium">Image</label>
                 {/* Show preview if imageUrl exists */}
                 {selectedTestimonial.imageUrl && (
                   <div className="mb-2">

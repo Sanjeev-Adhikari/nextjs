@@ -14,7 +14,8 @@ const testimonialSchema = new mongoose.Schema<TestimonialData>({
     },
     rating: {
         type: Number,
-        default: 5,
+        max: 5,
+        min: 1,
     },
     testimonial: {
         type: String,
